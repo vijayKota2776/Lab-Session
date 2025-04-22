@@ -1,0 +1,31 @@
+
+body {
+    background-image: url('https://www.transparenttextures.com/patterns/brick-wall.png');
+    background-repeat: repeat;
+    font-family: Arial, sans-serif;
+  }
+  
+  h1 {
+    background-color: yellow;
+    color: red;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid black;
+  }
+  
+  p {
+    color: gray;
+    margin: 10px;
+    background-color: yellow;
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  div {
+    background-color: yellow;
+    border: 1px solid black;
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+  }
