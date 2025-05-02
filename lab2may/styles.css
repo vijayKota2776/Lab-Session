@@ -1,0 +1,191 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: black;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  /* General Container */
+  .container {
+    width: 90%;
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px 0;
+    color: white;
+  }
+  
+  /* Header */
+  header {
+    background: #111;
+    color: white;
+    padding: 20px 0;
+  }
+  
+  header h1 {
+    float: left;
+    margin-left: 10px;
+  }
+  
+  header nav ul {
+    list-style: none;
+    float: right;
+  }
+  
+  header nav ul li {
+    display: inline;
+    margin-left: 20px;
+  }
+  
+  header nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  /* Hero Section */
+  .hero {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .hero-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    color: white; /* Ensure it's white */
+    text-align: center;
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    color: white;
+  }
+  
+  .hero-content h2 {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    margin-bottom: 1rem;
+  }
+  
+  .hero-content p {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    margin-bottom: 2rem;
+  }
+  
+  /* Button Styling */
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #333;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-top: 10px;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+  
+  .btn.primary {
+    background: #28a745;
+  }
+  
+  .btn.primary:hover {
+    background: #218838;
+  }
+  
+  /* Features Section */
+  .features {
+    background: white;
+    padding: 60px 20px;
+    text-align: center;
+  }
+  
+  .cards {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 30px;
+    gap: 20px;
+  }
+  
+  .card {
+    background: #f0f0f0;
+    color: black;
+    padding: 25px;
+    border-radius: 10px;
+    width: 280px;
+  }
+  .hi{
+    color: black;
+  }
+  
+  /* Testimonials */
+  .hello{
+    color: black;
+  }
+  .testimonials {
+    background: #e9f5ff;
+    padding: 60px 20px;
+    text-align: center;
+    color: #111; /* Fix low contrast */
+  }
+  .testimonial {
+    color: #222; /* Improve visibility */
+  }
+  
+  /* CTA Section */
+  .cta {
+    background: #dff9fb;
+    color: #111; /* Fix for better contrast */
+    text-align: center;
+    padding: 60px 20px;
+  }
+  
+  .cta .btn.primary {
+    background-color: #06efc1;
+    color: black;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .cta .btn.primary:hover {
+    background-color: #019875;
+  }
+  
+  .containers{
+    color: black;
+  }
+  /* Footer */
+  footer {
+    background: #111;
+    color: #aaa;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 14px;
+  }
