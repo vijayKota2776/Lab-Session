@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span>Art</span>Gallery
+        </div>
+        <nav>
+            <a href="index.html" class="active"><i class="fas fa-th-large"></i> Gallery</a>
+            <a href="favorites.html"><i class="fas fa-heart"></i> Favorites</a>
+            <a href="recent.html"><i class="fas fa-clock"></i> Recent</a>
+            <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+    </div>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search gallery...">
+            </div>
+            <div class="view-options">
+                <button class="view-btn active"><i class="fas fa-th-large"></i></button>
+                <button class="view-btn"><i class="fas fa-th-list"></i></button>
+            </div>
+        </div>
+
+        <div class="gallery-container">
+            <div class="gallery-item large">
+                <img src="images/mountain.jpg" alt="Gallery Image 1">
+                <div class="item-overlay">
+                    <h3>Mountain View</h3>
+                    <p>Nature Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/city.jpg" alt="Gallery Image 2">
+                <div class="item-overlay">
+                    <h3>City Lights</h3>
+                    <p>Urban Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/coast.jpg" alt="Gallery Image 3">
+                <div class="item-overlay">
+                    <h3>Ocean Waves</h3>
+                    <p>Nature Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/sunset.jpg" alt="Gallery Image 4">
+                <div class="item-overlay">
+                    <h3>Sunset</h3>
+                    <p>Landscape Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/forest.jpg" alt="Gallery Image 5">
+                <div class="item-overlay">
+                    <h3>Forest Path</h3>
+                    <p>Nature Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/architecture.jpg" alt="Gallery Image 6">
+                <div class="item-overlay">
+                    <h3>Architecture</h3>
+                    <p>Urban Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/beach.jpg" alt="Gallery Image 7">
+                <div class="item-overlay">
+                    <h3>Beach</h3>
+                    <p>Nature Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/cityscape.jpg" alt="Gallery Image 8">
+                <div class="item-overlay">
+                    <h3>Cityscape</h3>
+                    <p>Urban Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/mountains.jpg" alt="Gallery Image 9">
+                <div class="item-overlay">
+                    <h3>Mountains</h3>
+                    <p>Nature Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="images/waterfall.jpg" alt="Gallery Image 10">
+                <div class="item-overlay">
+                    <h3>Waterfall</h3>
+                    <p>Nature Photography</p>
+                    <div class="item-actions">
+                        <button><i class="fas fa-heart"></i></button>
+                        <button><i class="fas fa-share"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-content">
+            <img id="lightbox-img">
+            <div class="lightbox-info">
+                <h3 id="lightbox-title"></h3>
+                <p id="lightbox-category"></p>
+            </div>
+        </div>
+        <button class="lightbox-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script src="theme.js"></script>
+    <script>
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxCategory = document.getElementById('lightbox-category');
+        const closeBtn = document.querySelector('.lightbox-close');
+        const galleryItems = document.querySelectorAll('.gallery-item');
+
+        // Function to add item to recent items
+        function addToRecent(item) {
+            let recentItems = JSON.parse(localStorage.getItem('recentItems')) || [];
+            
+            // Remove if already exists
+            recentItems = recentItems.filter(i => i.id !== item.id);
+            
+            // Add to beginning of array
+            recentItems.unshift(item);
+            
+            // Keep only last 20 items
+            recentItems = recentItems.slice(0, 20);
+            
+            localStorage.setItem('recentItems', JSON.stringify(recentItems));
+        }
+
+        // Update your existing lightbox open function
+        function openLightbox(src, title, category, id) {
+            lightboxImg.src = src;
+            lightboxTitle.textContent = title;
+            lightboxCategory.textContent = category;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Add to recent items
+            addToRecent({
+                id: id,
+                image: src,
+                title: title,
+                category: category
+            });
+        }
+
+        // Update your gallery item click handler
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const img = item.querySelector('img');
+                const title = item.querySelector('h3').textContent;
+                const category = item.querySelector('p').textContent;
+                const id = item.dataset.id;
+                
+                openLightbox(img.src, title, category, id);
+            });
+        });
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        closeBtn.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        // View toggle
+        const viewButtons = document.querySelectorAll('.view-btn');
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                viewButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-container input');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            galleryItems.forEach(item => {
+                const title = item.querySelector('h3').textContent.toLowerCase();
+                const category = item.querySelector('p').textContent.toLowerCase();
+                item.style.display = title.includes(searchTerm) || category.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html> 
