@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorites - Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span>Art</span>Gallery
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-th-large"></i> Gallery</a>
+            <a href="favorites.html" class="active"><i class="fas fa-heart"></i> Favorites</a>
+            <a href="recent.html"><i class="fas fa-clock"></i> Recent</a>
+            <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+    </div>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search favorites...">
+            </div>
+            <div class="view-options">
+                <button class="view-btn active"><i class="fas fa-th-large"></i></button>
+                <button class="view-btn"><i class="fas fa-th-list"></i></button>
+            </div>
+        </div>
+
+        <div class="favorites-header">
+            <h2>My Favorites</h2>
+            <p class="favorites-count">0 items</p>
+        </div>
+
+        <div class="gallery-container" id="favorites-container">
+            <!-- Favorites will be dynamically added here -->
+        </div>
+
+        <div class="empty-state" id="empty-favorites">
+            <i class="fas fa-heart"></i>
+            <h3>No Favorites Yet</h3>
+            <p>Start adding your favorite images from the gallery</p>
+            <a href="index.html" class="btn-primary">Browse Gallery</a>
+        </div>
+    </main>
+
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-content">
+            <img id="lightbox-img">
+            <div class="lightbox-info">
+                <h3 id="lightbox-title"></h3>
+                <p id="lightbox-category"></p>
+            </div>
+        </div>
+        <button class="lightbox-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script src="theme.js"></script>
+    <script>
+        // Get favorites from localStorage
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem('favorites')) || [];
+        }
+
+        // Update favorites count
+        function updateFavoritesCount() {
+            const favorites = getFavorites();
+            const countElement = document.querySelector('.favorites-count');
+            countElement.textContent = `${favorites.length} items`;
+        }
+
+        // Display favorites
+        function displayFavorites() {
+            const favorites = getFavorites();
+            const container = document.getElementById('favorites-container');
+            const emptyState = document.getElementById('empty-favorites');
+
+            // Hide all other sections first
+            document.querySelectorAll('.gallery-container').forEach(section => {
+                if (section.id !== 'favorites-container') {
+                    section.style.display = 'none';
+                }
+            });
+
+            if (favorites.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+
+            favorites.forEach((item, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                if (index === 0) galleryItem.classList.add('large');
+
+                galleryItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}">
+                    <div class="item-overlay">
+                        <h3>${item.title}</h3>
+                        <p>${item.category}</p>
+                        <div class="item-actions">
+                            <button class="remove-favorite" data-id="${item.id}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="share-btn">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(galleryItem);
+            });
+
+            // Add event listeners for remove buttons
+            document.querySelectorAll('.remove-favorite').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    removeFavorite(id);
+                });
+            });
+
+            // Add event listeners for lightbox
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const img = item.querySelector('img');
+                    const title = item.querySelector('h3').textContent;
+                    const category = item.querySelector('p').textContent;
+                    
+                    openLightbox(img.src, title, category);
+                });
+            });
+        }
+
+        // Remove favorite
+        function removeFavorite(id) {
+            let favorites = getFavorites();
+            favorites = favorites.filter(item => item.id !== id);
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            displayFavorites();
+            updateFavoritesCount();
+        }
+
+        // Lightbox functionality
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxCategory = document.getElementById('lightbox-category');
+        const closeBtn = document.querySelector('.lightbox-close');
+
+        function openLightbox(src, title, category) {
+            lightboxImg.src = src;
+            lightboxTitle.textContent = title;
+            lightboxCategory.textContent = category;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        closeBtn.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-container input');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.gallery-item');
+            
+            items.forEach(item => {
+                const title = item.querySelector('h3').textContent.toLowerCase();
+                const category = item.querySelector('p').textContent.toLowerCase();
+                item.style.display = title.includes(searchTerm) || category.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // View toggle
+        const viewButtons = document.querySelectorAll('.view-btn');
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                viewButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Initial display
+        document.addEventListener('DOMContentLoaded', () => {
+            displayFavorites();
+            updateFavoritesCount();
+        });
+    </script>
+</body>
+</html> 
