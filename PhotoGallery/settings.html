@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span>Art</span>Gallery
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-th-large"></i> Gallery</a>
+            <a href="favorites.html"><i class="fas fa-heart"></i> Favorites</a>
+            <a href="recent.html"><i class="fas fa-clock"></i> Recent</a>
+            <a href="settings.html" class="active"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+    </div>
+
+    <main class="main-content">
+        <div class="settings-container">
+            <h2>Settings</h2>
+            
+            <div class="settings-section">
+                <h3>Appearance</h3>
+                <div class="setting-item">
+                    <label>Theme</label>
+                    <select id="theme-select">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                        <option value="system">System Default</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Grid Size</label>
+                    <select id="grid-size">
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Gallery Settings</h3>
+                <div class="setting-item">
+                    <label>Recent Items Limit</label>
+                    <input type="number" id="recent-limit" min="5" max="50" value="20">
+                </div>
+                <div class="setting-item">
+                    <label>Show Categories</label>
+                    <label class="switch">
+                        <input type="checkbox" id="show-categories" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>Auto-play Slideshow</label>
+                    <label class="switch">
+                        <input type="checkbox" id="auto-play">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Data Management</h3>
+                <div class="setting-item">
+                    <button id="clear-recent" class="btn-danger">
+                        <i class="fas fa-trash"></i> Clear Recent History
+                    </button>
+                </div>
+                <div class="setting-item">
+                    <button id="clear-favorites" class="btn-danger">
+                        <i class="fas fa-heart"></i> Clear Favorites
+                    </button>
+                </div>
+                <div class="setting-item">
+                    <button id="export-data" class="btn-secondary">
+                        <i class="fas fa-download"></i> Export Settings
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>About</h3>
+                <div class="setting-item">
+                    <p>Art Gallery v1.0</p>
+                    <p class="text-secondary">A beautiful gallery for your photos</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Load saved settings
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('gallerySettings')) || {
+                theme: 'dark',
+                gridSize: 'medium',
+                recentLimit: 20,
+                showCategories: true,
+                autoPlay: false
+            };
+
+            // Apply settings to form
+            document.getElementById('theme-select').value = settings.theme;
+            document.getElementById('grid-size').value = settings.gridSize;
+            document.getElementById('recent-limit').value = settings.recentLimit;
+            document.getElementById('show-categories').checked = settings.showCategories;
+            document.getElementById('auto-play').checked = settings.autoPlay;
+
+            // Apply theme
+            applyTheme(settings.theme);
+        }
+
+        // Save settings
+        function saveSettings() {
+            const settings = {
+                theme: document.getElementById('theme-select').value,
+                gridSize: document.getElementById('grid-size').value,
+                recentLimit: parseInt(document.getElementById('recent-limit').value),
+                showCategories: document.getElementById('show-categories').checked,
+                autoPlay: document.getElementById('auto-play').checked
+            };
+
+            localStorage.setItem('gallerySettings', JSON.stringify(settings));
+            applyTheme(settings.theme);
+        }
+
+        // Apply theme
+        function applyTheme(theme) {
+            document.body.className = theme;
+        }
+
+        // Clear recent history
+        document.getElementById('clear-recent').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear your recent history?')) {
+                localStorage.removeItem('recentItems');
+                alert('Recent history cleared!');
+            }
+        });
+
+        // Clear favorites
+        document.getElementById('clear-favorites').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all favorites?')) {
+                localStorage.removeItem('favorites');
+                alert('Favorites cleared!');
+            }
+        });
+
+        // Export settings
+        document.getElementById('export-data').addEventListener('click', () => {
+            const settings = localStorage.getItem('gallerySettings');
+            const blob = new Blob([settings], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gallery-settings.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Add event listeners for settings changes
+        document.querySelectorAll('select, input[type="number"], input[type="checkbox"]').forEach(element => {
+            element.addEventListener('change', saveSettings);
+        });
+
+        // Initialize settings
+        document.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .settings-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .settings-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item label {
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .setting-item select,
+        .setting-item input[type="number"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            width: 150px;
+        }
+
+        .setting-item select:focus,
+        .setting-item input[type="number"]:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Switch styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--gradient);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Button styles */
+        .btn-danger {
+            background: #ff3366;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: #ff1a4f;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .text-secondary {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Light theme styles */
+        body.light {
+            --bg-dark: #f5f5f5;
+            --bg-card: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+        }
+
+        body.light .settings-section {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light .setting-item {
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light .setting-item select,
+        body.light .setting-item input[type="number"] {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        body.light .setting-item select:focus,
+        body.light .setting-item input[type="number"]:focus {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light .slider {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light .btn-secondary {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        body.light .btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</body>
+</html> 
