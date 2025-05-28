@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent - Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span>Art</span>Gallery
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-th-large"></i> Gallery</a>
+            <a href="favorites.html"><i class="fas fa-heart"></i> Favorites</a>
+            <a href="recent.html" class="active"><i class="fas fa-clock"></i> Recent</a>
+            <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+    </div>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search recent items...">
+            </div>
+            <div class="view-options">
+                <button class="view-btn active"><i class="fas fa-th-large"></i></button>
+                <button class="view-btn"><i class="fas fa-th-list"></i></button>
+            </div>
+        </div>
+
+        <div class="favorites-header">
+            <h2>Recently Viewed</h2>
+            <p class="favorites-count">0 items</p>
+        </div>
+
+        <div class="gallery-container" id="recent-container">
+            <!-- Recent items will be dynamically added here -->
+        </div>
+
+        <div class="empty-state" id="empty-recent">
+            <i class="fas fa-clock"></i>
+            <h3>No Recent Items</h3>
+            <p>Start browsing the gallery to see your recent views</p>
+            <a href="index.html" class="btn-primary">Browse Gallery</a>
+        </div>
+    </main>
+
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-content">
+            <img id="lightbox-img">
+            <div class="lightbox-info">
+                <h3 id="lightbox-title"></h3>
+                <p id="lightbox-category"></p>
+            </div>
+        </div>
+        <button class="lightbox-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script src="theme.js"></script>
+    <script>
+        // Get recent items from localStorage
+        function getRecentItems() {
+            return JSON.parse(localStorage.getItem('recentItems')) || [];
+        }
+
+        // Update recent items count
+        function updateRecentCount() {
+            const recentItems = getRecentItems();
+            const countElement = document.querySelector('.favorites-count');
+            countElement.textContent = `${recentItems.length} items`;
+        }
+
+        // Display recent items
+        function displayRecentItems() {
+            const recentItems = getRecentItems();
+            const container = document.getElementById('recent-container');
+            const emptyState = document.getElementById('empty-recent');
+
+            // Hide all other sections first
+            document.querySelectorAll('.gallery-container').forEach(section => {
+                if (section.id !== 'recent-container') {
+                    section.style.display = 'none';
+                }
+            });
+
+            if (recentItems.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+
+            recentItems.forEach((item, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                if (index === 0) galleryItem.classList.add('large');
+
+                galleryItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}">
+                    <div class="item-overlay">
+                        <h3>${item.title}</h3>
+                        <p>${item.category}</p>
+                        <div class="item-actions">
+                            <button class="favorite-btn" data-id="${item.id}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="share-btn">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(galleryItem);
+            });
+
+            // Add event listeners for favorite buttons
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    toggleFavorite(id);
+                });
+            });
+
+            // Add event listeners for lightbox
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const img = item.querySelector('img');
+                    const title = item.querySelector('h3').textContent;
+                    const category = item.querySelector('p').textContent;
+                    
+                    openLightbox(img.src, title, category);
+                });
+            });
+
+            // Initialize favorite buttons
+            initializeFavorites();
+        }
+
+        // Toggle favorite
+        function toggleFavorite(id) {
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            const recentItems = getRecentItems();
+            const item = recentItems.find(item => item.id === id);
+
+            if (!item) return;
+
+            const isFavorite = favorites.some(fav => fav.id === id);
+            
+            if (isFavorite) {
+                favorites = favorites.filter(fav => fav.id !== id);
+            } else {
+                favorites.push(item);
+            }
+
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            displayRecentItems();
+        }
+
+        // Initialize favorite buttons
+        function initializeFavorites() {
+            const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                const id = btn.dataset.id;
+                if (favorites.some(fav => fav.id === id)) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // Lightbox functionality
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxCategory = document.getElementById('lightbox-category');
+        const closeBtn = document.querySelector('.lightbox-close');
+
+        function openLightbox(src, title, category) {
+            lightboxImg.src = src;
+            lightboxTitle.textContent = title;
+            lightboxCategory.textContent = category;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        closeBtn.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-container input');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.gallery-item');
+            
+            items.forEach(item => {
+                const title = item.querySelector('h3').textContent.toLowerCase();
+                const category = item.querySelector('p').textContent.toLowerCase();
+                item.style.display = title.includes(searchTerm) || category.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // View toggle
+        const viewButtons = document.querySelectorAll('.view-btn');
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                viewButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Initial display
+        document.addEventListener('DOMContentLoaded', () => {
+            displayRecentItems();
+            updateRecentCount();
+        });
+    </script>
+</body>
+</html> 
