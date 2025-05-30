@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Bubble - Distraction Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .session-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .progress-section {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            background: #f8f9fa;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .session-log {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .distraction-warning {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #8b0000;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 20%, 40%, 60%, 80% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        }
+
+        .focus-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .focus-indicator.unfocused {
+            background: #dc3545;
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .chart {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            height: 150px;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .chart-bar {
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 5px 5px 0 0;
+            min-width: 40px;
+            transition: height 0.3s ease;
+        }
+
+        .chart-bar.distraction {
+            background: linear-gradient(to top, #ff9a9e, #fecfef);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎯 Focus Bubble</div>
+            <div class="tagline">Stay focused, track distractions, improve productivity</div>
+        </div>
+
+        <div class="distraction-warning" id="distractionWarning">
+            🚨 Focus Alert! You've been distracted 3+ times. Time to refocus! 🎯
+        </div>
+
+        <div class="session-controls">
+            <button class="btn btn-primary" id="startBtn">Start Session</button>
+            <button class="btn btn-secondary" id="pauseBtn" disabled>Pause</button>
+            <button class="btn btn-secondary" id="endBtn" disabled>End Session</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="focusTime">00:00</div>
+                <div class="stat-label">Focus Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="distractionTime">00:00</div>
+                <div class="stat-label">Distraction Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="distractionCount">0</div>
+                <div class="stat-label">Distractions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="focusScore">100%</div>
+                <div class="stat-label">Focus Score</div>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <h3>Focus Progress</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <small>Goal: Maintain focus for your study session</small>
+        </div>
+
+        <div class="chart-container">
+            <h3>Session Overview</h3>
+            <div class="chart" id="sessionChart">
+                <div class="chart-bar" style="height: 0px;" title="Focus Time"></div>
+                <div class="chart-bar distraction" style="height: 0px;" title="Distraction Time"></div>
+            </div>
+            <div style="margin-top: 10px;">
+                <span style="color: #667eea;">■</span> Focus Time &nbsp;&nbsp;
+                <span style="color: #ff9a9e;">■</span> Distraction Time
+            </div>
+        </div>
+
+        <div class="session-log">
+            <h3>Session Log</h3>
+            <div id="logEntries">
+                <div class="log-entry">Click "Start Session" to begin tracking your focus! 🚀</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="focus-indicator" id="focusIndicator"></div>
+
+    <script>
+        class FocusBubble {
+            constructor() {
+                this.isSessionActive = false;
+                this.isPaused = false;
+                this.focusTime = 0;
+                this.distractionTime = 0;
+                this.distractionCount = 0;
+                this.sessionStartTime = null;
+                this.lastFocusTime = null;
+                this.isTabVisible = true;
+                
+                this.initEventListeners();
+                this.updateDisplay();
+                this.startTimer();
+            }
+
+            initEventListeners() {
+                // Button event listeners
+                document.getElementById('startBtn').addEventListener('click', () => this.startSession());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pauseSession());
+                document.getElementById('endBtn').addEventListener('click', () => this.endSession());
+
+                // Visibility API for tab switching detection
+                document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
+                
+                // Focus/blur events for additional tracking
+                window.addEventListener('focus', () => this.handleFocus());
+                window.addEventListener('blur', () => this.handleBlur());
+                
+                // Request notification permission on load
+                this.requestNotificationPermission();
+            }
+
+            startSession() {
+                this.isSessionActive = true;
+                this.isPaused = false;
+                this.sessionStartTime = Date.now();
+                this.lastFocusTime = Date.now();
+                
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                document.getElementById('endBtn').disabled = false;
+                
+                this.addLogEntry('📚 Study session started! Stay focused!');
+                this.showNotification('Focus Bubble', '📚 Study session started! Good luck!', 'success');
+                this.updateDisplay();
+            }
+
+            pauseSession() {
+                if (this.isPaused) {
+                    this.isPaused = false;
+                    this.lastFocusTime = Date.now();
+                    document.getElementById('pauseBtn').textContent = 'Pause';
+                    this.addLogEntry('▶️ Session resumed');
+                } else {
+                    this.isPaused = true;
+                    document.getElementById('pauseBtn').textContent = 'Resume';
+                    this.addLogEntry('⏸️ Session paused');
+                }
+            }
+
+            endSession() {
+                this.isSessionActive = false;
+                this.isPaused = false;
+                
+                // Calculate final stats before reset
+                const totalTime = this.focusTime + this.distractionTime;
+                const focusPercentage = totalTime > 0 ? Math.round((this.focusTime / totalTime) * 100) : 100;
+                
+                // Show completion notification and log
+                this.addLogEntry(`🎯 Session completed! Focus score: ${focusPercentage}%`);
+                this.showNotification('Session Complete!', `🎯 Great job! Your focus score: ${focusPercentage}%`, 'success');
+                
+                // Reset UI
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('endBtn').disabled = true;
+                document.getElementById('pauseBtn').textContent = 'Pause';
+                
+                // Reset all session data
+                this.resetSession();
+            }
+
+            resetSession() {
+                this.focusTime = 0;
+                this.distractionTime = 0;
+                this.distractionCount = 0;
+                this.sessionStartTime = null;
+                this.lastFocusTime = null;
+                
+                // Reset visual indicators
+                document.getElementById('focusIndicator').classList.remove('unfocused');
+                document.getElementById('distractionWarning').style.display = 'none';
+                
+                // Clear session log and add welcome message
+                const logEntries = document.getElementById('logEntries');
+                logEntries.innerHTML = '<div class="log-entry">Click "Start Session" to begin tracking your focus! 🚀</div>';
+                
+                // Update display with reset values
+                this.updateDisplay();
+                
+                this.addLogEntry('🔄 Session reset - Ready for a new study session!');
+            }
+
+            handleVisibilityChange() {
+                const wasVisible = this.isTabVisible;
+                this.isTabVisible = !document.hidden;
+                
+                if (!this.isSessionActive || this.isPaused) return;
+
+                if (wasVisible && !this.isTabVisible) {
+                    // Tab became hidden (user switched away)
+                    this.handleDistraction();
+                } else if (!wasVisible && this.isTabVisible) {
+                    // Tab became visible (user returned)
+                    this.handleFocus();
+                }
+            }
+
+            handleFocus() {
+                if (!this.isSessionActive || this.isPaused) return;
+                
+                this.lastFocusTime = Date.now();
+                document.getElementById('focusIndicator').classList.remove('unfocused');
+            }
+
+            handleBlur() {
+                if (!this.isSessionActive || this.isPaused) return;
+                
+                this.handleDistraction();
+            }
+
+            handleDistraction() {
+                if (!this.lastFocusTime) return;
+                
+                const now = Date.now();
+                const timeSinceLastFocus = now - this.lastFocusTime;
+                
+                this.distractionCount++;
+                this.addLogEntry(`🔄 Distraction detected (#${this.distractionCount})`);
+                
+                document.getElementById('focusIndicator').classList.add('unfocused');
+                
+                // Show different notifications based on distraction count
+                if (this.distractionCount === 1) {
+                    this.showNotification('First Distraction', '👀 Stay focused! You got this!', 'warning');
+                } else if (this.distractionCount === 3) {
+                    this.showNotification('Focus Alert!', '🚨 Multiple distractions detected. Time to refocus!', 'alert');
+                    this.showDistractionWarning();
+                } else if (this.distractionCount > 3 && this.distractionCount % 3 === 0) {
+                    this.showNotification('Refocus Reminder', '🎯 Take a deep breath and refocus on your studies!', 'alert');
+                    this.showDistractionWarning();
+                } else if (this.distractionCount > 1) {
+                    this.showNotification('Distraction Alert', `🔄 Distraction #${this.distractionCount} - Stay on track!`, 'warning');
+                }
+                
+                this.updateDisplay();
+            }
+
+            showDistractionWarning() {
+                const warning = document.getElementById('distractionWarning');
+                warning.style.display = 'block';
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    warning.style.display = 'none';
+                }, 5000);
+            }
+
+            requestNotificationPermission() {
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            this.addLogEntry('✅ Notifications enabled - you\'ll get focus reminders!');
+                        } else {
+                            this.addLogEntry('⚠️ Notifications disabled - enable them for better focus tracking');
+                        }
+                    });
+                }
+            }
+
+            showNotification(title, message, type = 'info') {
+                // Browser notification
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const notification = new Notification(title, {
+                        body: message,
+                        icon: this.getNotificationIcon(type),
+                        badge: '🎯',
+                        tag: 'focus-bubble',
+                        requireInteraction: type === 'alert',
+                        silent: false
+                    });
+
+                    // Auto-close notification after 4 seconds (except for alerts)
+                    if (type !== 'alert') {
+                        setTimeout(() => {
+                            notification.close();
+                        }, 4000);
+                    }
+
+                    // Handle notification clicks
+                    notification.onclick = () => {
+                        window.focus();
+                        notification.close();
+                    };
+                }
+
+                // Custom popup notification (fallback)
+                this.showCustomPopup(title, message, type);
+            }
+
+            getNotificationIcon(type) {
+                switch(type) {
+                    case 'success': return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎯</text></svg>';
+                    case 'warning': return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚠️</text></svg>';
+                    case 'alert': return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚨</text></svg>';
+                    default: return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📚</text></svg>';
+                }
+            }
+
+            showCustomPopup(title, message, type) {
+                // Create custom popup element
+                const popup = document.createElement('div');
+                popup.className = `custom-popup ${type}`;
+                popup.innerHTML = `
+                    <div class="popup-content">
+                        <div class="popup-title">${title}</div>
+                        <div class="popup-message">${message}</div>
+                        <button class="popup-close">×</button>
+                    </div>
+                `;
+
+                document.body.appendChild(popup);
+
+                // Add styles if not already added
+                if (!document.getElementById('popup-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'popup-styles';
+                    style.textContent = `
+                        .custom-popup {
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            background: white;
+                            border-radius: 10px;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                            z-index: 1000;
+                            min-width: 300px;
+                            max-width: 400px;
+                            animation: slideIn 0.3s ease-out;
+                            border-left: 4px solid #667eea;
+                        }
+                        .custom-popup.warning {
+                            border-left-color: #ffc107;
+                        }
+                        .custom-popup.alert {
+                            border-left-color: #dc3545;
+                        }
+                        .custom-popup.success {
+                            border-left-color: #28a745;
+                        }
+                        .popup-content {
+                            padding: 15px 20px;
+                            position: relative;
+                        }
+                        .popup-title {
+                            font-weight: bold;
+                            margin-bottom: 5px;
+                            color: #333;
+                        }
+                        .popup-message {
+                            color: #666;
+                            font-size: 0.9em;
+                        }
+                        .popup-close {
+                            position: absolute;
+                            top: 10px;
+                            right: 15px;
+                            background: none;
+                            border: none;
+                            font-size: 20px;
+                            cursor: pointer;
+                            color: #999;
+                        }
+                        .popup-close:hover {
+                            color: #333;
+                        }
+                        @keyframes slideIn {
+                            from {
+                                transform: translateX(100%);
+                                opacity: 0;
+                            }
+                            to {
+                                transform: translateX(0);
+                                opacity: 1;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                // Close button functionality
+                const closeBtn = popup.querySelector('.popup-close');
+                closeBtn.addEventListener('click', () => {
+                    popup.remove();
+                });
+
+                // Auto-close after 5 seconds (except for alerts)
+                if (type !== 'alert') {
+                    setTimeout(() => {
+                        if (popup.parentNode) {
+                            popup.remove();
+                        }
+                    }, 5000);
+                }
+            }
+
+            startTimer() {
+                setInterval(() => {
+                    if (!this.isSessionActive || this.isPaused) return;
+                    
+                    const now = Date.now();
+                    
+                    if (this.isTabVisible && document.hasFocus()) {
+                        // User is focused
+                        if (this.lastFocusTime) {
+                            this.focusTime += (now - this.lastFocusTime);
+                        }
+                        this.lastFocusTime = now;
+                    } else {
+                        // User is distracted
+                        if (this.lastFocusTime) {
+                            this.distractionTime += (now - this.lastFocusTime);
+                        }
+                        this.lastFocusTime = now;
+                    }
+                    
+                    this.updateDisplay();
+                }, 1000);
+            }
+
+            formatTime(milliseconds) {
+                const seconds = Math.floor(milliseconds / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+
+            updateDisplay() {
+                document.getElementById('focusTime').textContent = this.formatTime(this.focusTime);
+                document.getElementById('distractionTime').textContent = this.formatTime(this.distractionTime);
+                document.getElementById('distractionCount').textContent = this.distractionCount;
+                
+                const totalTime = this.focusTime + this.distractionTime;
+                const focusPercentage = totalTime > 0 ? Math.round((this.focusTime / totalTime) * 100) : 100;
+                document.getElementById('focusScore').textContent = `${focusPercentage}%`;
+                
+                // Update progress bar
+                document.getElementById('progressFill').style.width = `${focusPercentage}%`;
+                
+                this.updateChart();
+            }
+
+            updateChart() {
+                const focusBar = document.querySelector('.chart-bar:not(.distraction)');
+                const distractionBar = document.querySelector('.chart-bar.distraction');
+                
+                const maxTime = Math.max(this.focusTime, this.distractionTime, 1);
+                const focusHeight = (this.focusTime / maxTime) * 120;
+                const distractionHeight = (this.distractionTime / maxTime) * 120;
+                
+                focusBar.style.height = `${focusHeight}px`;
+                distractionBar.style.height = `${distractionHeight}px`;
+            }
+
+            addLogEntry(message) {
+                const logEntries = document.getElementById('logEntries');
+                const timestamp = new Date().toLocaleTimeString();
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `${timestamp} - ${message}`;
+                
+                logEntries.insertBefore(entry, logEntries.firstChild);
+                
+                // Keep only last 10 entries
+                while (logEntries.children.length > 10) {
+                    logEntries.removeChild(logEntries.lastChild);
+                }
+            }
+        }
+
+        // Initialize the Focus Bubble tracker
+        document.addEventListener('DOMContentLoaded', () => {
+            new FocusBubble();
+        });
+    </script>
+</body>
+</html>
